@@ -2,6 +2,7 @@ using ClinicApp.Domain.Entities;
 using ClinicApp.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ClinicApp.Infrastructure.Persistence.Configurations;
 
@@ -23,11 +24,13 @@ public class DoctorConfiguration : IEntityTypeConfiguration<Doctor>
             .IsRequired()
             .HasMaxLength(100);
 
-        // Email value object → string sütuna dönüştür
+        // Explicit ValueConverter — EF Core'un lambda'yı yanlış yorumlamasını önler
+        var emailConverter = new ValueConverter<Email, string>(
+            email => email.Value,
+            dbValue => Email.FromDatabase(dbValue));
+
         builder.Property(d => d.Email)
-            .HasConversion(
-                email => email.Value,
-                value => Email.FromDatabase(value))
+            .HasConversion(emailConverter)
             .IsRequired()
             .HasMaxLength(300);
 

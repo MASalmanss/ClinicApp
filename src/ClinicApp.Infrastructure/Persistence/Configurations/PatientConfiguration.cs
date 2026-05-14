@@ -2,6 +2,7 @@ using ClinicApp.Domain.Entities;
 using ClinicApp.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ClinicApp.Infrastructure.Persistence.Configurations;
 
@@ -26,29 +27,30 @@ public class PatientConfiguration : IEntityTypeConfiguration<Patient>
         builder.HasIndex(p => p.IdentityNumber)
             .IsUnique();
 
-        // Email value object → string sütuna dönüştür
+        var emailConverter = new ValueConverter<Email, string>(
+            email => email.Value,
+            dbValue => Email.FromDatabase(dbValue));
+
         builder.Property(p => p.Email)
-            .HasConversion(
-                email => email.Value,
-                value => Email.FromDatabase(value))
+            .HasConversion(emailConverter)
             .IsRequired()
             .HasMaxLength(300);
 
         builder.HasIndex(p => p.Email)
             .IsUnique();
 
-        // PhoneNumber value object → string sütuna dönüştür
+        var phoneConverter = new ValueConverter<PhoneNumber, string>(
+            phone => phone.Value,
+            dbValue => PhoneNumber.FromDatabase(dbValue));
+
         builder.Property(p => p.Phone)
-            .HasConversion(
-                phone => phone.Value,
-                value => PhoneNumber.FromDatabase(value))
+            .HasConversion(phoneConverter)
             .IsRequired()
             .HasMaxLength(15);
 
         builder.Property(p => p.DateOfBirth)
             .IsRequired();
 
-        // Backing field üzerinden HasMany — IReadOnlyCollection EF Core ile direkt çalışmaz
         builder.HasMany(p => p.Appointments)
             .WithOne(a => a.Patient)
             .HasForeignKey(a => a.PatientId)
