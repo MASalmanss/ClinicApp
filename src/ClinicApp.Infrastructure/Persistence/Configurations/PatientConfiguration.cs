@@ -48,10 +48,14 @@ public class PatientConfiguration : IEntityTypeConfiguration<Patient>
         builder.Property(p => p.DateOfBirth)
             .IsRequired();
 
-        // Navigation — silinirse randevular da silinsin
-        builder.HasMany<Appointment>()
-            .WithOne()
+        // Backing field üzerinden HasMany — IReadOnlyCollection EF Core ile direkt çalışmaz
+        builder.HasMany(p => p.Appointments)
+            .WithOne(a => a.Patient)
             .HasForeignKey(a => a.PatientId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Navigation(p => p.Appointments)
+            .HasField("_appointments")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

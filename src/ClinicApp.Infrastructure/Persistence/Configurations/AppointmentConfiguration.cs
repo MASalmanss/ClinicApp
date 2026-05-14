@@ -22,16 +22,6 @@ public class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
         builder.Property(a => a.Notes)
             .HasMaxLength(500);
 
-        // Patient navigation — GetByIdAsync'te include edebilmek için
-        builder.HasOne(a => a.Patient)
-            .WithMany()
-            .HasForeignKey(a => a.PatientId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        // Doctor navigation
-        builder.HasOne(a => a.Doctor)
-            .WithMany()
-            .HasForeignKey(a => a.DoctorId)
-            .OnDelete(DeleteBehavior.Restrict);
+        // İlişkiler Patient/Doctor Configuration'da tanımlanıyor
     }
 }

@@ -34,10 +34,13 @@ public class DoctorConfiguration : IEntityTypeConfiguration<Doctor>
         builder.HasIndex(d => d.Email)
             .IsUnique();
 
-        // Navigation
-        builder.HasMany<Appointment>()
-            .WithOne()
+        builder.HasMany(d => d.Appointments)
+            .WithOne(a => a.Doctor)
             .HasForeignKey(a => a.DoctorId)
-            .OnDelete(DeleteBehavior.Restrict); // doktor silinince randevu silinmesin, hata versin
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Navigation(d => d.Appointments)
+            .HasField("_appointments")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }
